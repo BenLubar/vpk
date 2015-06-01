@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 )
 
 type entrysort []entrypath
@@ -46,6 +47,7 @@ func (s entrysort) find(dir, base, ext string) *entrypath {
 	return nil
 }
 func splitPath(rel string) (dir, base, ext string) {
+	rel = strings.ToLower(rel)
 	dir = filepath.Dir(rel)
 	base = filepath.Base(rel)
 	ext = filepath.Ext(rel)
