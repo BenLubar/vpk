@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 )
 
 type entrysort []entrypath
@@ -107,6 +108,7 @@ type VPK struct {
 	version    uint32
 	treeLength uint32
 	entries    entrysort
+	modtime    time.Time
 }
 
 type vpkFileEntry struct {
@@ -126,7 +128,7 @@ func (e *vpkFileEntry) Open() (io.ReadCloser, error) {
 		return crcReader(bytes.NewReader(e.p), func() error { return nil }, e.e.CRC), nil
 	}
 
-	var f ReadSeekCloser
+	var f File
 	var err error
 	if e.e.ArchiveIndex == 0x7fff {
 		f, err = e.o.Main()
@@ -193,12 +195,11 @@ type Entry interface {
 	Open() (io.ReadCloser, error)
 }
 
-// ReadSeekCloser is any type that implements io.Reader, io.Seeker, and
-// io.Closer.
-type ReadSeekCloser interface {
+type File interface {
 	io.Reader
 	io.Seeker
 	io.Closer
+	Stat() (os.FileInfo, error)
 }
 
 func Open(o Opener) (*VPK, error) {
@@ -211,6 +212,13 @@ func Open(o Opener) (*VPK, error) {
 		return nil, err
 	}
 	defer r.Close()
+
+	fi, err := r.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	vpk.modtime = fi.ModTime()
 
 	br := bufio.NewReader(r)
 

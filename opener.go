@@ -7,9 +7,9 @@ import (
 
 type Opener interface {
 	// Main opens the main VPK file (*_dir.vpk or no suffix)
-	Main() (ReadSeekCloser, error)
+	Main() (File, error)
 	// Archive opens a data-only VPK file (*_###.vpk where # is a digit)
-	Archive(index int16) (ReadSeekCloser, error)
+	Archive(index int16) (File, error)
 }
 
 type singleVPKOpener string
@@ -19,11 +19,11 @@ func SingleVPK(path string) Opener {
 	return singleVPKOpener(path)
 }
 
-func (o singleVPKOpener) Main() (ReadSeekCloser, error) {
+func (o singleVPKOpener) Main() (File, error) {
 	return os.Open(string(o))
 }
 
-func (o singleVPKOpener) Archive(index int16) (ReadSeekCloser, error) {
+func (o singleVPKOpener) Archive(index int16) (File, error) {
 	return nil, os.ErrNotExist
 }
 
@@ -35,10 +35,10 @@ func MultiVPK(prefix string) Opener {
 	return multiVPKOpener(prefix)
 }
 
-func (o multiVPKOpener) Main() (ReadSeekCloser, error) {
+func (o multiVPKOpener) Main() (File, error) {
 	return os.Open(string(o) + "_dir.vpk")
 }
 
-func (o multiVPKOpener) Archive(index int16) (ReadSeekCloser, error) {
+func (o multiVPKOpener) Archive(index int16) (File, error) {
 	return os.Open(fmt.Sprintf("%s_%03d.vpk", string(o), index))
 }
