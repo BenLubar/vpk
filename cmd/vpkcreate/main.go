@@ -46,7 +46,7 @@ func main() {
 			}
 
 			if !info.IsDir() {
-				contents = append(contents, entry(filepath.Join(name, path)))
+				contents = append(contents, entry(path))
 			}
 
 			return nil
