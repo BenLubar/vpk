@@ -49,7 +49,7 @@ func (s entrysort) find(dir, base, ext string) *entrypath {
 }
 func splitPath(rel string) (dir, base, ext string) {
 	rel = strings.ToLower(rel)
-	dir = filepath.Dir(rel)
+	dir = filepath.ToSlash(filepath.Dir(rel))
 	base = filepath.Base(rel)
 	ext = filepath.Ext(rel)
 
